@@ -83,7 +83,7 @@ def main():
     # ====================================================
     training_args = Seq2SeqTrainingArguments(
         output_dir="./translation_model",
-        eval_strategy="epoch",
+        evaluation_strategy="epoch",
         save_strategy="epoch",
         learning_rate=3e-5,
         per_device_train_batch_size=16,
