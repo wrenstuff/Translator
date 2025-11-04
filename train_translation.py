@@ -7,7 +7,7 @@ from transformers import (
     MarianTokenizer,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
-    DataCollatorForSeq2Seq,
+    DataCollatorForSeq2Seq
 )
 
 def main():
@@ -43,7 +43,7 @@ def main():
     # ====================================================
     model_name = "Helsinki-NLP/opus-mt-en-de"  # English → German
     tokenizer = MarianTokenizer.from_pretrained(model_name)
-    model = MarianMTModel.from_pretrained(model_name).to(device)
+    model = MarianMTModel.from_pretrained(model_name, use_safetensors=True).to(device)
 
     # ====================================================
     # 3. Preprocessing Function
@@ -81,6 +81,7 @@ def main():
     # ====================================================
     # 5. Training Arguments
     # ====================================================
+
     training_args = Seq2SeqTrainingArguments(
         output_dir="./translation_model",
         eval_strategy="epoch",
@@ -92,7 +93,7 @@ def main():
         save_total_limit=3,
         num_train_epochs=3,
         predict_with_generate=True,
-        fp16=torch.cuda.is_available(),
+        fp16=True if torch.cuda.is_available() else False,
         report_to="none",  # disables wandb/tensorboard
         load_best_model_at_end=True,
         dataloader_num_workers=num_cpus,  # multi-core dataloading
