@@ -1,5 +1,6 @@
 import flask
 from flask import render_template, redirect, url_for
+import german_model_loader 
 
 app = flask.Flask(__name__)
 langs = [{'code':'en', 'name':'English'},
