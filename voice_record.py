@@ -1,5 +1,6 @@
 import speech_recognition as sr
 from langdetect import detect
+import pyaudio
 
 def voice_to_text():
     recording = sr.Recognizer()
@@ -14,5 +15,3 @@ def voice_to_text():
             print("Speech Recognition could not understand audio")
 
 # result, lang = voice_to_text()
-# print("Text: ", result)
-# print("Language: ", lang)
