@@ -6,33 +6,47 @@ from german_model_loader import translate_text
 import voice_record as voice
 
 app = flask.Flask(__name__)
-langs = [{'code':'en', 'name':'English'},
-{'code':'es', 'name':'Spanish'},
+starter_langs = [{'code':'en', 'name':'English'}]
+
+translated_langs = [{'code':'es', 'name':'Spanish'},
 {'code':'de', 'name':'German'},]
 
 
 @app.route("/")
 def home():
-    return render_template("home.html", langs=langs)
+    return render_template("home.html",
+                           starter_langs=starter_langs,
+                           translated_langs=translated_langs)
 
 
 @app.route("/record", methods=['POST'])
 def record():
     result, recorded_lang = voice.voice_to_text()
     old_text = request.form['text']
-    fulltext = old_text + ". " +  result
-    return render_template("home.html", text=fulltext, recorded_lang=recorded_lang, langs=langs)
+    if old_text != "":
+        fulltext = old_text + ". " +  result
+    else:
+        fulltext = result
+    return render_template("home.html",
+                           text=fulltext, recorded_lang=recorded_lang,
+                           starter_langs=starter_langs,
+                           translated_langs=translated_langs)
 
 
 @app.route("/translate", methods=["POST"])
 def translate():
     result = request.form['text']
     translated_text = translate_text(result)
-    return render_template("home.html", text=result, output=translated_text, langs=langs)
+    return render_template("home.html",
+                           text=result, output=translated_text,
+                           starter_langs=starter_langs,
+                           translated_langs=translated_langs)
+
 
 @app.route("/playagain")
 def playagain():
     return redirect(url_for("static"))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
