@@ -1,5 +1,7 @@
 import flask
 from flask import render_template, redirect, url_for, jsonify, request
+from openpyxl.styles.builtins import output
+
 from german_model_loader import translate_text
 import voice_record as voice
 
@@ -14,27 +16,19 @@ def home():
     return render_template("home.html", langs=langs)
 
 
-@app.route("/record")
+@app.route("/record", methods=['POST'])
 def record():
     result, recorded_lang = voice.voice_to_text()
-    return render_template("home.html", text=result, recorded_lang=recorded_lang, langs=langs)
+    old_text = request.form['text']
+    fulltext = old_text + ". " +  result
+    return render_template("home.html", text=fulltext, recorded_lang=recorded_lang, langs=langs)
 
 
 @app.route("/translate", methods=["POST"])
 def translate():
-    data = ""
-
-    if not data or "text" not in data:
-        return jsonify({"error": "No text provided"}), 400
-
-    input_text = data["text"]
-    output_text = translate_text(input_text)
-
-    return redirect(url_for("static")), jsonify({
-        "inputText": input_text,
-        "outputText": output_text
-    })
-
+    result = request.form['text']
+    translated_text = translate_text(result)
+    return render_template("home.html", text=result, output=translated_text, langs=langs)
 
 @app.route("/playagain")
 def playagain():

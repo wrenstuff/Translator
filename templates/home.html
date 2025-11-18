@@ -27,7 +27,10 @@
                     <textarea id="source-text" readonly>{{ text }}</textarea>
 
                     <div class="row" style="margin-top:8px">
-                        <a href="/record"><button id="speak-btn" class="secondary">Record</button></a>
+                        <form action="/record" method="post">
+                            <input type="hidden" name="text" value="{{ text }}">
+                            <button id="speak-btn" class="secondary" type="submit">Record</button>
+                        </form>
                         <a href="/stop"><button id="stop-speak-btn" class="secondary">Stop</button></a>
                         <div style="flex:1"></div>
                         <a href="/clear"><button id="clear-btn" class="secondary">Clear</button></a>
@@ -43,7 +46,7 @@
                     </select>
 
                     <label for="target-text" style="margin-top:12px">Translation</label>
-                    <textarea id="target-text" readonly></textarea>
+                    <textarea id="target-text" readonly>{{ output }}</textarea>
 
                     <div class="row" style="margin-top:8px">
                         <a href="/playagain"><button id="play-tts" class="secondary">Play Again</button></a>
@@ -51,7 +54,10 @@
                 </div>
             </div>
             <div class="bottom-row" style="margin-top:8px">
-                <a href="/translate"><button id="translate-btn">Translate</button></a>
+                <form action="/translate" method="post">
+                    <input type="hidden" name="text" value="{{ text }}">
+                    <button id="translate-btn" type="submit">Translate</button>
+                </form>
             </div>
         </section>
     </main>
