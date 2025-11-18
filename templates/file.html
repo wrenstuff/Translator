@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Instant Translator</title>
+  <meta name="description" content="Simple translator with text input, speech-to-text and text-to-speech using LibreTranslate API" />
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#94a3b8;--accent:#7c3aed;--glass:rgba(255,255,255,0.04)}
+    *{box-sizing:border-box}
+    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0; background:linear-gradient(180deg,#071029 0%, #071826 100%); color:#e6eef8; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:32px}
+    .wrapper{width:100%; max-width:980px}
+    header{display:flex; align-items:center; gap:16px; margin-bottom:18px}
+    .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#2563eb);display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .card{background:var(--card); border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.7);border:1px solid rgba(255,255,255,0.03)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:8px}
+    textarea,input,select{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;font-size:14px;resize:vertical}
+    textarea{min-height:140px}
+    .controls{display:flex;gap:8px;align-items:center}
+    button{background:linear-gradient(90deg,var(--accent),#2563eb);border:none;padding:10px 14px;border-radius:10px;color:white;font-weight:600;cursor:pointer}
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    .row{display:flex;gap:8px;align-items:center}
+    .lang-row{display:flex;gap:8px}
+    .small{font-size:12px;color:var(--muted)}
+    footer{margin-top:12px;color:var(--muted);font-size:12px}
+
+    @media (max-width:800px){.grid{grid-template-columns:1fr;}.logo{width:42px;height:42px}}
+  </style>
+</head>
+<body>
+  <main class="wrapper">
+    <header>
+      <div class="logo">T</div>
+      <div>
+        <h1>Instant Translator</h1>
+        <p class="lead">Type, speak or paste text — translate instantly. Uses LibreTranslate (public API) by default.</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="grid">
+        <div>
+          <label for="source-lang">From</label>
+          <div class="lang-row">
+            <select id="source-lang" aria-label="source language"></select>
+            <button id="detect-btn" class="secondary">Detect</button>
+          </div>
+
+          <label for="source-text" style="margin-top:12px">Text to translate</label>
+          <textarea id="source-text" placeholder="Type or paste text here"></textarea>
+
+          <div class="row" style="margin-top:8px">
+            <button id="speak-btn" class="secondary">🎙️ Speak</button>
+            <button id="stop-speak-btn" class="secondary">⏹️ Stop</button>
+            <div style="flex:1"></div>
+            <button id="clear-btn" class="secondary">Clear</button>
+          </div>
+        </div>
+
+        <div>
+          <label for="target-lang">To</label>
+          <select id="target-lang" aria-label="target language"></select>
+
+          <label for="target-text" style="margin-top:12px">Translation</label>
+          <textarea id="target-text" placeholder="Translation will appear here" readonly></textarea>
+
+          <div class="row" style="margin-top:8px">
+            <button id="play-tts" class="secondary">🔊 Play</button>
+            <button id="copy-translation" class="secondary">Copy</button>
+            <div style="flex:1"></div>
+            <button id="swap-btn" class="secondary">Swap</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:14px;align-items:center">
+        <div style="flex:1">
+          <label class="small">API Endpoint</label>
+          <input id="api-endpoint" value="https://libretranslate.com/translate" />
+        </div>
+
+        <div style="width:260px;display:flex;gap:8px;align-items:center">
+          <label class="small" style="width:62px">Options</label>
+          <select id="formality">
+            <option value="0">Default</option>
+            <option value="1">Formal</option>
+            <option value="2">Informal</option>
+          </select>
+
+          <button id="translate-btn">Translate</button>
+        </div>
+      </div>
+
+      <footer>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span>Supports speech-to-text and text-to-speech in most modern browsers.</span>
+          <span class="small">Made with ♥ — single-file demo</span>
+        </div>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    // Languages list (subset). You can expand this list or fetch dynamically from the API.
+    const LANGS = [
+      {code:'auto', name:'Auto Detect'},
+      {code:'en', name:'English'},
+      {code:'es', name:'Spanish'},
+      {code:'fr', name:'French'},
+      {code:'de', name:'German'},
+      {code:'zh', name:'Chinese (Simplified)'},
+      {code:'ja', name:'Japanese'},
+      {code:'ko', name:'Korean'},
+      {code:'ru', name:'Russian'},
+      {code:'pt', name:'Portuguese'},
+      {code:'hi', name:'Hindi'},
+      {code:'ar', name:'Arabic'},
+      {code:'it', name:'Italian'},
+      {code:'nl', name:'Dutch'},
+      {code:'sv', name:'Swedish'},
+      {code:'pl', name:'Polish'}
+    ];
+
+    const srcLang = document.getElementById('source-lang');
+    const tgtLang = document.getElementById('target-lang');
+    const srcText = document.getElementById('source-text');
+    const tgtText = document.getElementById('target-text');
+    const apiEndpoint = document.getElementById('api-endpoint');
+
+    function populateLangs(){
+      LANGS.forEach(l=>{
+        const o1 = document.createElement('option'); o1.value = l.code; o1.textContent = l.name; srcLang.appendChild(o1);
+        const o2 = document.createElement('option'); o2.value = l.code; o2.textContent = l.name; tgtLang.appendChild(o2);
+      });
+      srcLang.value = 'auto';
+      tgtLang.value = 'en';
+    }
+    populateLangs();
+
+    // Translate function using LibreTranslate-like API
+    async function translate(){
+      const text = srcText.value.trim();
+      if(!text){ alert('Enter text to translate'); return; }
+      const endpoint = apiEndpoint.value.trim() || 'https://libretranslate.com/translate';
+      const source = srcLang.value === 'auto' ? '' : srcLang.value;
+      const target = tgtLang.value || 'en';
+
+      tgtText.value = 'Translating...';
+
+      try{
+        const res = await fetch(endpoint, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ q:text, source: source || 'auto', target, format:'text' })
+        });
+
+        if(!res.ok){
+          const txt = await res.text();
+          throw new Error('API error: '+res.status+' '+txt);
+        }
+
+        const data = await res.json();
+        // LibreTranslate returns { translatedText: '...' }
+        const translated = data.translatedText || data.translation || JSON.stringify(data);
+        tgtText.value = translated;
+      }catch(err){
+        console.error(err);
+        tgtText.value = '';
+        alert('Translate failed — check console and API endpoint. ' + err.message);
+      }
+    }
+
+    document.getElementById('translate-btn').addEventListener('click', translate);
+
+    // Swap functionality
+    document.getElementById('swap-btn').addEventListener('click', ()=>{
+      const a = srcLang.value; srcLang.value = tgtLang.value; tgtLang.value = a;
+      const t = srcText.value; srcText.value = tgtText.value; tgtText.value = t;
+    });
+
+    // Clear
+    document.getElementById('clear-btn').addEventListener('click', ()=>{ srcText.value=''; tgtText.value=''; });
+
+    // Copy translation
+    document.getElementById('copy-translation').addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(tgtText.value); alert('Copied'); }catch(e){ alert('Copy failed'); }
+    });
+
+    // Text-to-speech
+    document.getElementById('play-tts').addEventListener('click', ()=>{
+      const text = tgtText.value.trim(); if(!text) return alert('Nothing to speak');
+      const utter = new SpeechSynthesisUtterance(text);
+      // Attempt to set lang to match target language
+      utter.lang = tgtLang.value === 'auto' ? 'en' : tgtLang.value;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utter);
+    });
+
+    // Speech-to-text (Web Speech API)
+    let recognition = null;
+    const speakBtn = document.getElementById('speak-btn');
+    const stopSpeakBtn = document.getElementById('stop-speak-btn');
+
+    function setupRecognition(){
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!SpeechRecognition) { speakBtn.disabled = true; stopSpeakBtn.disabled = true; speakBtn.title = 'Speech recognition not supported in this browser'; return; }
+      recognition = new SpeechRecognition();
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      recognition.onresult = (e)=>{
+        let interim = '';
+        let final = '';
+        for(let i= e.resultIndex; i< e.results.length; i++){
+          const r = e.results[i];
+          if(r.isFinal) final += r[0].transcript;
+          else interim += r[0].transcript;
+        }
+        srcText.value = final || interim || srcText.value;
+      };
+      recognition.onerror = (ev)=>{ console.error('Recognition error', ev); };
+      recognition.onend = ()=>{ speakBtn.disabled = false; stopSpeakBtn.disabled = true; };
+    }
+    setupRecognition();
+
+    speakBtn.addEventListener('click', ()=>{
+      if(!recognition) return alert('Speech recognition not supported');
+      try{
+        recognition.lang = srcLang.value === 'auto' ? 'en-US' : srcLang.value;
+      }catch(e){}
+      recognition.start(); speakBtn.disabled = true; stopSpeakBtn.disabled = false;
+    });
+    stopSpeakBtn.addEventListener('click', ()=>{ if(recognition) recognition.stop(); });
+
+    // Detect language using a public detect endpoint if available
+    document.getElementById('detect-btn').addEventListener('click', async ()=>{
+      const text = srcText.value.trim(); if(!text) return alert('Enter text to detect language for');
+      const endpointBase = apiEndpoint.value.trim().replace(/\/translate\/?$/,'');
+      const detectEndpoint = endpointBase + '/detect';
+      try{
+        const res = await fetch(detectEndpoint, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ q:text })
+        });
+        if(!res.ok) throw new Error('Detect failed: '+res.status);
+        const data = await res.json();
+        // LibreTranslate returns array like [{language:'en', confidence:0.6}]
+        if(Array.isArray(data) && data[0] && data[0].language){
+          srcLang.value = data[0].language;
+          alert('Detected: ' + data[0].language + ' (confidence ' + (data[0].confidence||'n/a') + ')');
+        } else {
+          alert('Could not parse detect response: ' + JSON.stringify(data));
+        }
+      }catch(err){ console.error(err); alert('Language detect failed — check API endpoint and CORS.'); }
+    });
+
+    // Initialize recommended defaults
+    (function init(){
+      // If browser language available, prefer it for source
+      const bl = (navigator.language||'en').split('-')[0];
+      if(LANGS.some(l=>l.code===bl)) srcLang.value = bl;
+    })();
+
+    // Allow pressing Ctrl+Enter to translate
+    srcText.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey) && e.key === 'Enter') translate(); });
+
+  </script>
+</body>
+</html>
