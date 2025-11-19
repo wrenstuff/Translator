@@ -39,7 +39,7 @@
 
                 <div>
                     <label for="target-lang">To</label>
-                    <select id="target-lang" aria-label="target language">
+                    <select id="target-lang" name="code" form="translate-form" aria-label="target language">
                         {% for lang in translated_langs %}
                         <option value="{{lang.code}}">{{ lang.name }}</option>
                         {% endfor %}
@@ -54,7 +54,7 @@
                 </div>
             </div>
             <div class="bottom-row" style="margin-top:8px">
-                <form action="/translate" method="post">
+                <form id="translate-form" action="/translate" method="post">
                     <input type="hidden" name="text" value="{{ text }}">
                     <button id="translate-btn" type="submit">Translate</button>
                 </form>
