@@ -21,8 +21,8 @@ def main():
     torch.set_num_threads(num_cpus)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"✅ Using device: {device}")
-    print(f"✅ Detected {num_cpus} CPU cores")
+    print(f"Using device: {device}")
+    print(f"Detected {num_cpus} CPU cores")
 
     # ====================================================
     # 1. Load Dataset
@@ -36,7 +36,7 @@ def main():
         }
     )
 
-    print("\n📦 Dataset loaded:")
+    print("\nDataset loaded:")
     print(dataset)
 
     # ====================================================
@@ -77,14 +77,14 @@ def main():
         model_inputs["labels"] = labels["input_ids"]
         return model_inputs
 
-    print("\n🧩 Tokenizing dataset using all CPU cores...")
+    print("\nTokenizing dataset using all CPU cores...")
     tokenized_datasets = dataset.map(
         preprocess_function,
         batched=True,
         num_proc=num_cpus,  # Parallel tokenization
         remove_columns=dataset["train"].column_names
     )
-    print("✅ Tokenization complete")
+    print("Tokenization complete")
 
     # ====================================================
     # 4. Data Collator
@@ -141,20 +141,20 @@ def main():
     # ====================================================
     # 7. Train & Save
     # ====================================================
-    print("\n🚀 Starting training...")
+    print("\nStarting training...")
     trainer.train()
-    print("✅ Training complete")
+    print("Training complete")
 
     trainer.save_model("./final_translation_model")
     tokenizer.save_pretrained("./final_translation_model")
-    print("💾 Model and tokenizer saved to ./final_translation_model")
+    print("Model and tokenizer saved to ./final_translation_model")
 
     # ====================================================
     # 8. Evaluate on Test Set
     # ====================================================
-    print("\n📊 Evaluating on test set...")
+    print("\nEvaluating on test set...")
     results = trainer.evaluate(tokenized_datasets["test"])
-    print("✅ Test Results:", results)
+    print("Test Results:", results)
 
 # ====================================================
 # Windows multiprocessing entry point
