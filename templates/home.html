@@ -42,12 +42,17 @@
                     <textarea id="target-text" readonly>{{ output }}</textarea>
 
                     <div class="row" style="margin-top:8px">
-                        <a href="/playagain"><button id="play-tts" class="secondary">Play Again</button></a>
+                        {% if tts_file %}
+                        <audio controls>
+                            <source src="{{ url_for('static', filename='audio/' + tts_file) }}?cache={{ tts_file }}" type="audio/mpeg">
+                            Your browser does not support audio.
+                        </audio>
+                        {% endif %}
                     </div>
                 </div>
             </div>
             <div class="bottom-row" style="margin-top:8px">
-                <form id="translate-form" action="/translate" method="post">
+                <form id="translate-form" action="/translate" method="post" onsubmit="localStorage.setItem('playTTS', '1')">
                     <input type="hidden" name="text" value="{{ text }}">
                     <input type="hidden" name="recorded_lang" value="{{ recorded_lang }}">
                     <button id="translate-btn" type="submit">Translate</button>

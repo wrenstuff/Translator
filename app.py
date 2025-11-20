@@ -74,18 +74,22 @@ def translate():
     tts_path = None
     if code != "en":
         tts_lang = code
-    
+    else:
+        tts_lang = "en"
+
+    audio_filename = f"tts_{uuid.uuid4().hex}.mp3"
+
+    os.makedirs("static/audio", exist_ok=True)
+
+    tts = gTTS(text=translated_text, lang=tts_lang)
+    tts.save("static/audio/" + audio_filename)
 
     return render_template("home.html",
                            text=text,
                            output=translated_text,
+                           tts_file=audio_filename,
                            recorded_lang=recorded_lang,
                            translated_langs=translated_langs)
-
-
-@app.route("/playagain")
-def playagain():
-    return redirect(url_for("static"))
 
 
 @app.route("/clear")
@@ -96,6 +100,7 @@ def clear():
                            text=text,
                            output=translated_text,
                            translated_langs=translated_langs)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
