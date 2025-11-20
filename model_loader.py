@@ -23,8 +23,8 @@ def load_model(model_name):
     return model, tokenizer
 
 
-es_model, es_tokenizer = load_model("spanish_model")
-de_model, de_tokenizer = load_model("german_model")
+es_model, es_tokenizer = load_model("es_en_model")
+de_model, de_tokenizer = load_model("de_en_model")
 
 
 # =========================

@@ -14,15 +14,9 @@
             <h1 class="title">NeoBabel</h1>
             <div class="grid">
                 <div>
-                    <label for="source-lang">From</label>
                     <div class="lang-row">
-                        <select id="source-lang" aria-label="source language">
-                            {% for lang in starter_langs %}
-                            <option value="{{lang.code}}">{{ lang.name }}</option>
-                            {% endfor %}
-                        </select>
+                        <h2 id="source-lang">Recorded Language: {{ recorded_lang }}</h2>
                     </div>
-
                     <label for="source-text" style="margin-top:12px">Text to translate</label>
                     <textarea id="source-text" readonly>{{ text }}</textarea>
 
@@ -31,7 +25,6 @@
                             <input type="hidden" name="text" value="{{ text }}">
                             <button id="speak-btn" class="secondary" type="submit">Record</button>
                         </form>
-                        <a href="/stop"><button id="stop-speak-btn" class="secondary">Stop</button></a>
                         <div style="flex:1"></div>
                         <a href="/clear"><button id="clear-btn" class="secondary">Clear</button></a>
                     </div>
@@ -56,6 +49,7 @@
             <div class="bottom-row" style="margin-top:8px">
                 <form id="translate-form" action="/translate" method="post">
                     <input type="hidden" name="text" value="{{ text }}">
+                    <input type="hidden" name="recorded_lang" value="{{ recorded_lang }}">
                     <button id="translate-btn" type="submit">Translate</button>
                 </form>
             </div>

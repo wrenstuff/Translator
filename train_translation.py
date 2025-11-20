@@ -46,6 +46,18 @@ def main():
     tokenizer = MarianTokenizer.from_pretrained(model_name)
     model = MarianMTModel.from_pretrained(model_name).to(device)
 
+    # Comment out section 2 and replace with below to upgrade a model
+    # MODEL_PATH = ""  # the existing models path
+    #
+    # ====================================================
+    # For Loading an EXISTING model + tokenizer
+    # ====================================================
+    # tokenizer = MarianTokenizer.from_pretrained(MODEL_PATH)
+    # model = MarianMTModel.from_pretrained(MODEL_PATH)
+    #
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # model = model.to(device)
+
     # ====================================================
     # 3. Preprocessing Function
     # ====================================================
