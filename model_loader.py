@@ -25,8 +25,8 @@ def load_model(model_name):
 
 es_en_model, es_en_tokenizer = load_model("es_en_model")
 de_en_model, de_en_tokenizer = load_model("de_en_model")
-#en_es_model, en_es_tokenizer = load_model("en_es_model")
-#en_de_model, en_de_tokenizer = load_model("en_de_model")
+en_es_model, en_es_tokenizer = load_model("en_es_model")
+en_de_model, en_de_tokenizer = load_model("en_de_model")
 
 
 # =========================

@@ -49,6 +49,13 @@ def translate():
     code = request.form['code']
     recorded_lang = request.form['recorded_lang']
 
+    if recorded_lang == code:
+        return render_template("home.html",
+                               text=text,
+                               output=text,
+                               recorded_lang=recorded_lang,
+                               translated_langs=translated_langs)
+
     model_key = f"{recorded_lang}-{code}"
 
     if model_key not in models:
@@ -58,9 +65,16 @@ def translate():
                                recorded_lang=recorded_lang,
                                translated_langs=translated_langs)
 
+
+
     model, tokenizer = models[model_key]
 
     translated_text = ml.translate_text(model, tokenizer, text)
+
+    tts_path = None
+    if code != "en":
+        tts_lang = code
+    
 
     return render_template("home.html",
                            text=text,
