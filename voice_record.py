@@ -17,7 +17,14 @@ def voice_to_text():
     with open("voice.wav", "wb") as f:
         f.write(audio.get_wav_data())
 
-    segments, info = model.transcribe("voice.wav", beam_size=5, language=None)
+    segments, info = model.transcribe(
+        "voice.wav",
+        language=None,
+        task="transcribe",
+        beam_size=10,
+        best_of=5,
+        temperature=[0.0, 0.2, 0.4, 0.6]
+    )
 
     text = "".join([seg.text for seg in segments])
     detected_lang = info.language
