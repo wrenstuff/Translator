@@ -2,6 +2,9 @@ import flask
 from flask import render_template, redirect, url_for, request
 import model_loader as ml
 import voice_record as voice
+from gtts import gTTS
+import uuid
+import os
 
 app = flask.Flask(__name__)
 
@@ -10,8 +13,10 @@ translated_langs = [{'code': 'en', 'name': 'English'},
                     {'code': 'de', 'name': 'German'},]
 
 models = {
-    "es" : (ml.es_model, ml.es_tokenizer),
-    "de" : (ml.de_model, ml.de_tokenizer),
+    "es-en": (ml.es_en_model, ml.es_en_tokenizer),
+    "de-en": (ml.de_en_model, ml.de_en_tokenizer),
+    "en-es" : (ml.en_es_model, ml.en_es_tokenizer),
+    "en-de" : (ml.en_de_model, ml.en_de_tokenizer),
 }
 
 @app.route("/")
@@ -44,27 +49,18 @@ def translate():
     code = request.form['code']
     recorded_lang = request.form['recorded_lang']
 
-    if recorded_lang == "en" and code != "en":
-        # English → OTHER
-        model_key = code
+    model_key = f"{recorded_lang}-{code}"
 
-    elif recorded_lang != "en" and code == "en":
-        # OTHER → English
-        model_key = recorded_lang
-
-    else:
-        # Non-English → Non-English (not yet supported)
+    if model_key not in models:
         return render_template("home.html",
                                text=text,
                                output="Language not supported",
                                recorded_lang=recorded_lang,
                                translated_langs=translated_langs)
 
-    if model_key not in models:
-        translated_text = "Language not supported"
-    else:
-        model, tokenizer = models[model_key]
-        translated_text = ml.translate_text(model, tokenizer, text)
+    model, tokenizer = models[model_key]
+
+    translated_text = ml.translate_text(model, tokenizer, text)
 
     return render_template("home.html",
                            text=text,
