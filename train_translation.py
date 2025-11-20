@@ -8,6 +8,7 @@ from transformers import (
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
     DataCollatorForSeq2Seq,
+    GenerationConfig
 )
 
 def main():
@@ -41,9 +42,21 @@ def main():
     # ====================================================
     # 2. Model & Tokenizer
     # ====================================================
-    model_name = "Helsinki-NLP/opus-mt-en-de"  # English → German
+    model_name = "Helsinki-NLP/opus-mt-en-es"
     tokenizer = MarianTokenizer.from_pretrained(model_name)
     model = MarianMTModel.from_pretrained(model_name).to(device)
+
+    # Comment out section 2 and replace with below to upgrade a model
+    # MODEL_PATH = ""  # the existing models path
+    #
+    # ====================================================
+    # For Loading an EXISTING model + tokenizer
+    # ====================================================
+    # tokenizer = MarianTokenizer.from_pretrained(MODEL_PATH)
+    # model = MarianMTModel.from_pretrained(MODEL_PATH)
+    #
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # model = model.to(device)
 
     # ====================================================
     # 3. Preprocessing Function
@@ -81,9 +94,23 @@ def main():
     # ====================================================
     # 5. Training Arguments
     # ====================================================
+    gpu_capability = torch.cuda.get_device_capability()
+    supports_bf16 = gpu_capability[0] >= 8  # 8.x+ = BF16 capable
+    supports_bf16 = False
+
+    # Detect BF16 support
+    if torch.cuda.is_available():
+        major, minor = torch.cuda.get_device_capability()
+        supports_bf16 = major >= 8
+
+    generation_config = GenerationConfig(
+        max_length=128,
+        num_beams=4
+    )
+
     training_args = Seq2SeqTrainingArguments(
         output_dir="./translation_model",
-        evaluation_strategy="epoch",
+        eval_strategy="epoch",
         save_strategy="epoch",
         learning_rate=3e-5,
         per_device_train_batch_size=16,
@@ -91,11 +118,12 @@ def main():
         weight_decay=0.01,
         save_total_limit=3,
         num_train_epochs=3,
-        predict_with_generate=True,
-        fp16=torch.cuda.is_available(),
+        generation_config=generation_config,
+        bf16=supports_bf16,
+        fp16=not supports_bf16,
         report_to="none",  # disables wandb/tensorboard
         load_best_model_at_end=True,
-        dataloader_num_workers=num_cpus,  # multi-core dataloading
+        dataloader_num_workers=max(1, num_cpus - 1),  # multi-core dataloading
     )
 
     # ====================================================

@@ -1,17 +1,29 @@
+from faster_whisper import WhisperModel
 import speech_recognition as sr
-from langdetect import detect
+import torch
 import pyaudio
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+compute_type = "float16" if device == "cuda" else "int8"
+
+model = WhisperModel("medium", device=device, compute_type=compute_type)
 
 def voice_to_text():
     recording = sr.Recognizer()
     with sr.Microphone() as source:
         print("Waiting for Audio...")
         audio = recording.listen(source)
-        try:
-            text = recording.recognize_google(audio)
-            detected_lang = detect(text)
-            return text, detected_lang
-        except sr.UnknownValueError:
-            print("Speech Recognition could not understand audio")
+
+    with open("voice.wav", "wb") as f:
+        f.write(audio.get_wav_data())
+
+    segments, info = model.transcribe("voice.wav", beam_size=5, language=None)
+
+    text = "".join([seg.text for seg in segments])
+    detected_lang = info.language
+
+    return text.strip(), detected_lang
+
+
 
 # result, lang = voice_to_text()
