@@ -1,8 +1,12 @@
 from faster_whisper import WhisperModel
 import speech_recognition as sr
+import torch
 import pyaudio
 
-model = WhisperModel("medium", device="cuda")
+device = "cuda" if torch.cuda.is_available() else "cpu"
+compute_type = "float16" if device == "cuda" else "int8"
+
+model = WhisperModel("medium", device=device, compute_type=compute_type)
 
 def voice_to_text():
     recording = sr.Recognizer()
