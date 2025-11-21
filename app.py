@@ -1,5 +1,5 @@
 import flask
-from flask import render_template, redirect, url_for, request
+from flask import render_template, request
 import model_loader as ml
 import voice_record as voice
 from gtts import gTTS
